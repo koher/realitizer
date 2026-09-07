@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Select Xcode 26.6
+        run: sudo xcode-select --switch /Applications/Xcode_26.6.app/Contents/Developer
+      - name: Build
+        run: swift build
+      - name: Test
+        run: swift test
+      - name: Build and test external public API consumer
+        working-directory: Examples/PublicAPIConsumer
+        run: |
+          swift build
+          swift test
+          xcodebuild test -scheme RealitizerConsumer -destination 'platform=iOS Simulator,name=iPhone 17e' CODE_SIGNING_ALLOWED=NO
